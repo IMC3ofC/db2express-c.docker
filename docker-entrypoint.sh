@@ -44,12 +44,12 @@ if [ "${LICENSE}" != "accept" ];then
    exit 1
 fi
 
-if [[ $1 = "-d" ]]; then
+if [[ $1 = "db2start" ]]; then
   su - db2inst1 -c "db2start"
   service sshd start
   while true; do sleep 1000; done
 fi
 
-if [[ $1 = "-bash" ]]; then
+if [[ $1 = "bash" ]]; then
   /bin/bash
 fi
