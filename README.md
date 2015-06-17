@@ -70,16 +70,7 @@ docker run -d -p 50000:50000 -e DB2INST1_PASSWORD=db2inst1-pwd -e LICENSE=accept
 ```
 * ``` db2start```,  db2 services start automatically and remote client can connect to it at port ```50000```
 
-###2) Mount a volume
-While starting a Docker container, you can mount a volume from a directory on the Docker host like the following command :
-
-```shell
-docker run -it -p 50000:50000 -e DB2INST1_PASSWORD=db2inst1-pwd -e LICENSE=accept   -v  $(pwd):/share  ibmcom/db2express-c:latest bash
-```
-* ```/share```,  referring to mount point at "/share" in the Docker. 
-* ``` $(pwd)```,  the current directory on Docker host while running Docker command, which is mounted by Docker container. It can also be any existing directory on Docker host, like ```/tmp```, ```/opt```, etc.
-
-###3) DB2 is deployed in the Docker Engine in:
+###2) DB2 is deployed in the Docker Engine in:
 
 ```shell
  /opt/ibm/db2/V10.5
