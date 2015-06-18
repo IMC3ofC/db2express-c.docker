@@ -58,8 +58,7 @@ docker exec -it db2expc  bash
 
 * ```db2expc```, a container name created while starting Docker container
 
-###2) Create sample DB
-Please switch to the default db2 instance user ```db2inst1``` to start DB2 instance and create a sample database if you want :
+Then, please switch to the default db2 instance user ```db2inst1``` to create a sample database if you want :
 
 ```shell
 $ su - db2inst1
@@ -69,7 +68,7 @@ $ db2sampl
 * The time of creating a sample database depends on your system performance, which may take several minutes.
 * You can create another database using ```db2 create db <dbname>``` command.
 
-###3) DB2 is deployed in the Docker Engine in:
+###2) DB2 is deployed in the Docker Engine in:
 
 ```shell
  /opt/ibm/db2/V10.5
