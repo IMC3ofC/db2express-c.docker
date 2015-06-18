@@ -46,7 +46,6 @@ docker run --name db2expc -d -p 50000:50000 -e DB2INST1_PASSWORD=db2inst1-pwd -e
 * ```-p 50000:50000``` exposes port ```50000``` to allow connections from the remote client.
 * By specifying ```-e DB2INST1_PASSWORD=db2inst1-pwd``` parameter, you set a password of your choice for the `db2inst1` user for the default DB2 instance.
 * By specifying ```-e LICENSE=accept``` parameter, you are accepting this [License](http://www-03.ibm.com/software/sla/sladb.nsf/displaylis/5DF1EE126832D3F185257DAB0064BEFA?OpenDocument)  to use the software contained in this image.
-* ``` db2start```,  db2 services start automatically and remote client can connect to it at port ```50000```
 
 ##3. Note
 
