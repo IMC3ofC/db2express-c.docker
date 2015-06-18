@@ -39,38 +39,38 @@ This docker image contained pre-deployed DB2 Express-C with the default DB2 inst
 ##1. Start a container
 
 ```shell
-docker run -it -p 50000:50000 -e DB2INST1_PASSWORD=db2inst1-pwd -e LICENSE=accept ibmcom/db2express-c:latest bash
+docker run --name db2express-c -d -p 50000:50000 -e DB2INST1_PASSWORD=db2inst1-pwd -e LICENSE=accept ibmcom/db2express-c:latest db2start
 ```
 
 * ```-p 50000:50000``` exposes port ```50000``` to allow connections from the remote client.
+* ```db2express-c```, a container name assigned while starting Docker container.
+* ``` db2start```,  db2 services start automatically and remote client can connect to it at port ```50000```
 * By specifying ```-e DB2INST1_PASSWORD=db2inst1-pwd``` parameter, you set a password of your choice for the `db2inst1` user for the default DB2 instance.
 * By specifying ```-e LICENSE=accept``` parameter, you are accepting this [License](http://www-03.ibm.com/software/sla/sladb.nsf/displaylis/5DF1EE126832D3F185257DAB0064BEFA?OpenDocument)  to use the software contained in this image.
 
+##3. Note
 
-##2. Start DB2 and create sample DB
+###1) How to create sample DB
+Please start an interactive bash shell against a running container
+
+```shell
+docker exec -it db2express-c  bash
+```
+
+* ```db2express-c```, a container name created when you start Docker container
+
+###2) Create sample DB
 Please switch to the default db2 instance user ```db2inst1``` to start DB2 instance and create a sample database if you want :
 
 ```shell
 $ su - db2inst1
-$ db2start
 $ db2sampl
 ```
 
 * The time of creating a sample database depends on your system performance, which may take several minutes.
 * You can create another database using ```db2 create db <dbname>``` command.
 
-
-##3. Note
-
-###1) Start as a daemon
-You can start a container as a daemon with DB2 services up/running : 
-
-```shell
-docker run -d -p 50000:50000 -e DB2INST1_PASSWORD=db2inst1-pwd -e LICENSE=accept  ibmcom/db2express-c:latest db2start
-```
-* ``` db2start```,  db2 services start automatically and remote client can connect to it at port ```50000```
-
-###2) DB2 is deployed in the Docker Engine in:
+###3) DB2 is deployed in the Docker Engine in:
 
 ```shell
  /opt/ibm/db2/V10.5
