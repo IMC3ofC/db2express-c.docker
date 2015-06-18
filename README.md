@@ -39,7 +39,7 @@ This docker image contained pre-deployed DB2 Express-C with the default DB2 inst
 ##1. Start a container
 
 ```shell
-docker run --name db2expc -d -p 50000:50000 -e DB2INST1_PASSWORD=db2inst1-pwd -e LICENSE=accept db2express-c:latest db2start
+docker run --name db2expc -d -p 50000:50000 -e DB2INST1_PASSWORD=db2inst1-pwd -e LICENSE=accept db2express-c:latest -d
 ```
 
 * ```db2expc```, a container name created while starting Docker container.
