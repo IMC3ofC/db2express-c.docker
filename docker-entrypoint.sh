@@ -46,7 +46,6 @@ fi
 
 if [[ $1 = "-d" ]]; then
   su - db2inst1 -c "db2start"
-  service sshd start
   while true; do sleep 1000; done
 else
   exec "$1"
