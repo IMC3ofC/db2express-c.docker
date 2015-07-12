@@ -1,10 +1,10 @@
 #!/bin/bash
-set -e
 #
 #   Initialize DB2 instance in a Docker container
 #
 # # Authors:
 #   * Leo (Zhong Yu) Wu       <leow@ca.ibm.com>
+#   * Boris Manojlovic        <boris@steki.net>
 #
 # Copyright 2015, IBM Corporation
 #
@@ -20,33 +20,91 @@ set -e
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+pid=0
 
-if [ -z "$DB2INST1_PASSWORD" ]; then
-  echo ""
-  echo >&2 'error: DB2INST1_PASSWORD not set'
-  echo >&2 'Did you forget to add -e DB2INST1_PASSWORD=... ?'
-  exit 1
-else
-  echo -e "$DB2INST1_PASSWORD\n$DB2INST1_PASSWORD" | passwd db2inst1
+function log_info {
+ echo -e $(date '+%Y-%m-%d %T')"\e[1;32m $@\e[0m"
+}
+function log_error {
+ echo -e >&2 $(date +"%Y-%m-%d %T")"\e[1;31m $@\e[0m"
+}
+
+function stop_db2 {
+  log_info "stopping database engine"
+  su - db2inst1 -c "db2stop force"
+}
+
+function start_db2 {
+  log_info "starting database engine"
+  su - db2inst1 -c "db2start"
+}
+
+function restart_db2 {
+  # if you just need to restart db2 and not to kill this container
+  # use docker kill -s USR1 <container name>
+  kill ${spid}
+  log_info "Asked for instance restart doing it..."
+  stop_db2
+  start_db2
+  log_info "database instance restarted on request"
+}
+
+function terminate_db2 {
+  kill ${spid}
+  stop_db2
+  if [ $pid -ne 0 ]; then
+    kill -SIGTERM "$pid"
+    wait "$pid"
+  fi
+  log_info "database engine stopped"
+  exit 0 # finally exit main handler script
+}
+
+trap "terminate_db2"  SIGTERM
+trap "restart_db2"   SIGUSR1
+
+if [ ! -f ~/db2inst1_pw_set ]; then
+  if [ -z "$DB2INST1_PASSWORD" ]; then
+    log_error "error: DB2INST1_PASSWORD not set"
+    log_error "Did you forget to add -e DB2INST1_PASSWORD=... ?"
+    exit 1
+  else
+    log_info "Setting db2inst1 user password..."
+    (echo "$DB2INST1_PASSWORD"; echo "$DB2INST1_PASSWORD") | passwd db2inst1 > /dev/null  2>&1
+    if [ $? != 0 ];then
+      log_error "Changing password for db2inst1 failed"
+      exit 1
+    fi
+    touch ~/db2inst1_pw_set
+  fi
 fi
+if [ ! -f ~/db2_license_accepted ];then
+  if [ -z "$LICENSE" ];then
+     log_error "error: LICENSE not set"
+     log_error "Did you forget to add '-e LICENSE=accept' ?"
+     exit 1
+  fi
 
-if [ -z "$LICENSE" ];then
-   echo ""
-   echo >&2 'error: LICENSE not set'
-   echo >&2 "Did you forget to add '-e LICENSE=accept' ?"
-   exit 1
-fi
-
-if [ "${LICENSE}" != "accept" ];then
-   echo ""
-   echo >&2 "error: LICENSE not set to 'accept'"
-   echo >&2 "Please set '-e LICENSE=accept' to accept License before use the DB2 software contained in this image."
-   exit 1
+  if [ "${LICENSE}" != "accept" ];then
+     log_error "error: LICENSE not set to 'accept'"
+     log_error "Please set '-e LICENSE=accept' to accept License before use the DB2 software contained in this image."
+     exit 1
+  fi
+  touch ~/db2_license_accepted
 fi
 
 if [[ $1 = "-d" ]]; then
-  su - db2inst1 -c "db2start"
-  while true; do sleep 1000; done
+  log_info "Initializing container"
+  start_db2
+  log_info "Database db2diag log following"
+  tail -f ~db2inst1/sqllib/db2dump/db2diag.log &
+  export pid=${!}
+  while true
+  do
+    sleep 10000 &
+    export spid=${!}
+    wait $spid
+  done
 else
   exec "$1"
 fi
