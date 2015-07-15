@@ -70,8 +70,7 @@ if [ ! -f ~/db2inst1_pw_set ]; then
     exit 1
   else
     log_info "Setting db2inst1 user password..."
-    (echo "$DB2INST1_PASSWORD"; echo "$DB2INST1_PASSWORD") | passwd db2inst1
-    # > /dev/null  2>&1
+    (echo "$DB2INST1_PASSWORD"; echo "$DB2INST1_PASSWORD") | passwd db2inst1 > /dev/null  2>&1
     if [ $? != 0 ];then
       log_error "Changing password for db2inst1 failed"
       exit 1
