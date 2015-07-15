@@ -39,6 +39,7 @@ RUN groupadd db2iadm1 && useradd -G db2iadm1 db2inst1
 RUN yum install -y \
     vi \
     sudo \
+    passwd \
     pam \
     pam.i686 \
     ncurses-libs.i686 \
