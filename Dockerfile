@@ -23,11 +23,9 @@
 #   centos:7
 
 
-FROM    centos:7
+FROM centos:7
 
 MAINTAINER Leo Wu <leow@ca.ibm.com>
-
-User root
 
 ###############################################################
 #
@@ -35,40 +33,47 @@ User root
 #
 ###############################################################
 
-RUN  yum -y install wget
+RUN groupadd db2iadm1 && useradd -G db2iadm1 db2inst1
 
-RUN  wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
-RUN  rpm -ivh epel-release-7-5.noarch.rpm
-
-# Required pacakges
-RUN yum install -y vi tar initscripts \
-    system-config-language \
+# Required packages
+RUN yum install -y \
+    vi \
     sudo \
-    passwd \
     pam \
     pam.i686 \
     ncurses-libs.i686 \
     file \
-    rsyslog \
-    e2fsprogs \
     libaio \
-    libaio.i686 \
-    compat-libstdc++-33 \
-    libstdc++-devel \
     libstdc++-devel.i686 \
-    dapl-devel \
-    libibverbs-devel \
-    sg3_utils \
-    numactl \
-    numactl.i686 \
-    gcc-c++ \
-    kernel-devel \
-    openssh-server
+    && yum clean all
 
-COPY install_db2.sh /tmp/install_db2.sh
-RUN  /tmp/install_db2.sh
+ENV DB2EXPRESSC_DATADIR /home/db2inst1/data
+ENV DB2EXPRESSC_SHA256 a5c9a3231054047f1f63e7144e4da49c4feaca25d8fce4ad97539d72abfc93d0
+ENV DB2EXPRESSC_URL https://s3.amazonaws.com/db2-expc105-64bit-centos/v10.5fp5_linuxx64_expc.tar.gz
+
+RUN curl -fSLo /tmp/expc.tar.gz $DB2EXPRESSC_URL \
+    && echo "$DB2EXPRESSC_SHA256 /tmp/expc.tar.gz" | sha256sum -c - \
+    && cd /tmp && tar xf expc.tar.gz \
+    &&  su - db2inst1 -c "/tmp/expc/db2_install -b /home/db2inst1/sqllib" \
+    && echo '. /home/db2inst1/sqllib/db2profile' >> /home/db2inst1/.bash_profile
+
+RUN sed -ri  's/(ENABLE_OS_AUTHENTICATION=).*/\1YES/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
+    && sed -ri  's/(RESERVE_REMOTE_CONNECTION=).*/\1YES/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
+    && sed -ri 's/^\*(SVCENAME=db2c_db2inst1)/\1/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
+    && sed -ri 's/^\*(SVCEPORT)=48000/\1=50000/g' /home/db2inst1/sqllib/instance/db2rfe.cfg
+
+RUN mkdir $DB2EXPRESSC_DATADIR && chown db2inst1.db2iadm1 $DB2EXPRESSC_DATADIR
+
+RUN su - db2inst1 -c "db2start && db2set DB2COMM=TCPIP && db2 UPDATE DBM CFG USING DFTDBPATH $DB2EXPRESSC_DATADIR IMMEDIATE" \
+    && su - db2inst1 -c "db2stop force"
+
+RUN cd /home/db2inst1/sqllib/instance \
+    && ./db2rfe -f ./db2rfe.cfg \
+    && rm -rf /tmp/db2* && rm -rf /tmp/expc*
 
 COPY docker-entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
-EXPOSE 22 50000
+VOLUME $DB2EXPRESSC_DATADIR
+
+EXPOSE 50000
