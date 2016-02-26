@@ -50,7 +50,11 @@ RUN yum install -y \
 
 ENV DB2EXPRESSC_DATADIR /home/db2inst1/data
 ENV DB2EXPRESSC_SHA256 a5c9a3231054047f1f63e7144e4da49c4feaca25d8fce4ad97539d72abfc93d0
-ENV DB2EXPRESSC_URL https://s3.amazonaws.com/db2-expc105-64bit-centos/v10.5fp5_linuxx64_expc.tar.gz
+
+# IMPORTANT Note: 
+#    Please download zip file of db2 express-c from http://www-01.ibm.com/software/data/db2/express-c/download.html
+#    and then upload it to a cloud storage and replace URL here 
+ENV DB2EXPRESSC_URL <URL_OF_DB2EXPRESSC_ZIP>
 
 RUN curl -fSLo /tmp/expc.tar.gz $DB2EXPRESSC_URL \
     && echo "$DB2EXPRESSC_SHA256 /tmp/expc.tar.gz" | sha256sum -c - \
