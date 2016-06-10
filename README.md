@@ -20,7 +20,7 @@
 
 #Supported tags
 
-*  ```latest``` (```10.5.0.5``)
+*  ```latest``` (``10.5.0.5``)
 *  ```10.5.0.5```,
 
 The supported tags stands for ```<db2 version>```.
@@ -71,7 +71,7 @@ $ db2sampl
 ###2) DB2 is deployed in the Docker Engine in:
 
 ```shell
- /opt/ibm/db2/V10.5
+ /home/db2inst1
 ``` 
 
 #License
