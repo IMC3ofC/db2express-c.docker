@@ -49,16 +49,15 @@ RUN yum install -y \
     && yum clean all
 
 ENV DB2EXPRESSC_DATADIR /home/db2inst1/data
-ENV DB2EXPRESSC_SHA256 a5c9a3231054047f1f63e7144e4da49c4feaca25d8fce4ad97539d72abfc93d0
 
 # IMPORTANT Note:
 #  Due to compliance for IBM product, you have to host a downloaded DB2 Express-C Zip file yourself
 #  Here are suggested steps:
 #    1) Please download zip file of db2 express-c from http://www-01.ibm.com/software/data/db2/express-c/download.html
-#    2) Then upload it to a cloud storage like AWS S3 or IBM SoftLayer Object Storage 
-#    3) Acquire a URL of file and replace the below
-#    replace URL here 
-ENV DB2EXPRESSC_URL <URL_OF_DB2EXPRESSC_ZIP>
+#    2) Then upload it to a cloud storage like AWS S3 or IBM SoftLayer Object Storage
+#    3) Acquire a URL and SHA-256 hash of file and pass it via Docker's build time argument facility
+ARG DB2EXPRESSC_URL
+ARG DB2EXPRESSC_SHA256
 
 RUN curl -fSLo /tmp/expc.tar.gz $DB2EXPRESSC_URL \
     && echo "$DB2EXPRESSC_SHA256 /tmp/expc.tar.gz" | sha256sum -c - \
