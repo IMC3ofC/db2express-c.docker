@@ -62,22 +62,19 @@ ARG DB2EXPRESSC_SHA256
 RUN curl -fSLo /tmp/expc.tar.gz $DB2EXPRESSC_URL \
     && echo "$DB2EXPRESSC_SHA256 /tmp/expc.tar.gz" | sha256sum -c - \
     && cd /tmp && tar xf expc.tar.gz \
-    &&  su - db2inst1 -c "/tmp/expc/db2_install -b /home/db2inst1/sqllib" \
-    && echo '. /home/db2inst1/sqllib/db2profile' >> /home/db2inst1/.bash_profile
-
-RUN sed -ri  's/(ENABLE_OS_AUTHENTICATION=).*/\1YES/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
+    && su - db2inst1 -c "/tmp/expc/db2_install -b /home/db2inst1/sqllib" \
+    && echo '. /home/db2inst1/sqllib/db2profile' >> /home/db2inst1/.bash_profile \
+    && rm -rf /tmp/db2* && rm -rf /tmp/expc* \
+    && sed -ri  's/(ENABLE_OS_AUTHENTICATION=).*/\1YES/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
     && sed -ri  's/(RESERVE_REMOTE_CONNECTION=).*/\1YES/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
     && sed -ri 's/^\*(SVCENAME=db2c_db2inst1)/\1/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
-    && sed -ri 's/^\*(SVCEPORT)=48000/\1=50000/g' /home/db2inst1/sqllib/instance/db2rfe.cfg
-
-RUN mkdir $DB2EXPRESSC_DATADIR && chown db2inst1.db2iadm1 $DB2EXPRESSC_DATADIR
+    && sed -ri 's/^\*(SVCEPORT)=48000/\1=50000/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
+    && mkdir $DB2EXPRESSC_DATADIR && chown db2inst1.db2iadm1 $DB2EXPRESSC_DATADIR
 
 RUN su - db2inst1 -c "db2start && db2set DB2COMM=TCPIP && db2 UPDATE DBM CFG USING DFTDBPATH $DB2EXPRESSC_DATADIR IMMEDIATE && db2 create database db2inst1" \
-    && su - db2inst1 -c "db2stop force"
-
-RUN cd /home/db2inst1/sqllib/instance \
-    && ./db2rfe -f ./db2rfe.cfg \
-    && rm -rf /tmp/db2* && rm -rf /tmp/expc*
+    && su - db2inst1 -c "db2stop force" \
+    && cd /home/db2inst1/sqllib/instance \
+    && ./db2rfe -f ./db2rfe.cfg
 
 COPY docker-entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
