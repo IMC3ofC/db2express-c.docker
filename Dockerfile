@@ -47,6 +47,7 @@ RUN yum install -y \
     libaio \
     libstdc++-devel.i686 \
     numactl-libs \
+    which \
     && yum clean all
 
 ENV DB2EXPRESSC_DATADIR /home/db2inst1/data
