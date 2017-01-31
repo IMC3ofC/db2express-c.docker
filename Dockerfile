@@ -46,6 +46,8 @@ RUN yum install -y \
     file \
     libaio \
     libstdc++-devel.i686 \
+    numactl-libs \
+    which \
     && yum clean all
 
 ENV DB2EXPRESSC_DATADIR /home/db2inst1/data
@@ -62,7 +64,7 @@ ARG DB2EXPRESSC_SHA256
 RUN curl -fSLo /tmp/expc.tar.gz $DB2EXPRESSC_URL \
     && echo "$DB2EXPRESSC_SHA256 /tmp/expc.tar.gz" | sha256sum -c - \
     && cd /tmp && tar xf expc.tar.gz \
-    && su - db2inst1 -c "/tmp/expc/db2_install -b /home/db2inst1/sqllib" \
+    && su - db2inst1 -c "/tmp/expc/db2_install -y -b /home/db2inst1/sqllib" \
     && echo '. /home/db2inst1/sqllib/db2profile' >> /home/db2inst1/.bash_profile \
     && rm -rf /tmp/db2* && rm -rf /tmp/expc* \
     && sed -ri  's/(ENABLE_OS_AUTHENTICATION=).*/\1YES/g' /home/db2inst1/sqllib/instance/db2rfe.cfg \
